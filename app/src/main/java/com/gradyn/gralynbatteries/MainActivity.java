@@ -1,8 +1,5 @@
 package com.gradyn.gralynbatteries;
 
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -14,14 +11,21 @@ import android.widget.Switch;
 import com.gradyn.gralynbatteries.Configuration.Configuration;
 import com.gradyn.gralynbatteries.Configuration.ConfigurationHelper;
 
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+
 public class MainActivity extends AppCompatActivity {
+    public static MainActivity inst;
+    public SharedPreferences preferences;
+    public Configuration config;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        final SharedPreferences preferences = getPreferences(Context.MODE_PRIVATE);
-        final Configuration config = ConfigurationHelper.LoadConfiguration(preferences);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        inst = this;
+        preferences = getPreferences(Context.MODE_PRIVATE);
+        config = ConfigurationHelper.LoadConfiguration(preferences);
 
         final Switch batteryReportingSwitch = (Switch) findViewById(R.id.BatteryReportingSwitch);
         final EditText gralynApiRootTextView = (EditText) findViewById(R.id.GralynApiRootTextbox);
