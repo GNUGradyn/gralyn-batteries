@@ -50,6 +50,7 @@ public class BatteryReportWorker extends Worker {
             json.put("AccessCode", MainActivity.inst.config.getAccessCode());
             BatteryManager bm = (BatteryManager) MainActivity.inst.getSystemService(BATTERY_SERVICE);
             json.put("Level", bm.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY));
+            json.put("Charging", bm.isCharging());
             try (OutputStream os = con.getOutputStream()) {
                 byte[] input = json.toString().getBytes("utf-8");
                 os.write(input, 0, input.length);
