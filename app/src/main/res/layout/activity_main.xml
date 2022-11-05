@@ -13,7 +13,8 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         tools:layout_editor_absoluteX="0dp"
-        tools:layout_editor_absoluteY="0dp">
+        tools:layout_editor_absoluteY="0dp"
+        android:stretchColumns="1">
 
         <TableRow
             android:layout_width="match_parent"
@@ -25,11 +26,16 @@
                 android:layout_height="wrap_content"
                 android:text="Battery Reporting" />
 
-            <Switch
-                android:id="@+id/BatteryReportingSwitch"
-                android:layout_width="293dp"
-                android:layout_height="wrap_content"
-                android:height="48dp" />
+            <FrameLayout
+                android:layout_width="match_parent"
+                >
+                <Switch
+                    android:layout_gravity="end"
+                    android:id="@+id/BatteryReportingSwitch"
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:height="48dp" />
+            </FrameLayout>
         </TableRow>
 
         <TableRow
