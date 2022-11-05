@@ -11,8 +11,14 @@ import android.widget.Switch;
 import com.gradyn.gralynbatteries.Configuration.Configuration;
 import com.gradyn.gralynbatteries.Configuration.ConfigurationHelper;
 
+import java.util.concurrent.TimeUnit;
+
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.work.Constraints;
+import androidx.work.NetworkType;
+import androidx.work.PeriodicWorkRequest;
+import androidx.work.WorkRequest;
 
 public class MainActivity extends AppCompatActivity {
     public static MainActivity inst;
@@ -32,6 +38,14 @@ public class MainActivity extends AppCompatActivity {
         final EditText accessCodeRootTextView = (EditText) findViewById(R.id.AccessCodeTextbox);
         final Button savebutton = (Button) findViewById(R.id.SaveButton);
 
+        WorkRequest reporter =
+                new PeriodicWorkRequest.Builder(BatteryReportWorker.class,
+                        15, TimeUnit.MINUTES).setConstraints(
+                                new Constraints.Builder()
+                                        .setRequiredNetworkType(NetworkType.CONNECTED)
+                                        .build())
+                        .build();
+
         batteryReportingSwitch.setChecked(config.getBatteryReporting());
         gralynApiRootTextView.setText(config.getApiRoot());
         accessCodeRootTextView.setText(config.getAccessCode());
@@ -48,5 +62,7 @@ public class MainActivity extends AppCompatActivity {
                         .show();
             }
         });
+
+
     }
 }
