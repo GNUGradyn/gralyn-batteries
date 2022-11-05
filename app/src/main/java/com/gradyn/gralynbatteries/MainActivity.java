@@ -37,7 +37,11 @@ public class MainActivity extends AppCompatActivity {
                 config.setAccessCode(accessCodeRootTextView.getText().toString());
                 config.setBatteryReporting(batteryReportingSwitch.isChecked());
                 config.setApiRoot(gralynApiRootTextView.getText().toString());
-                AlertDialog.Builder builder = new AlertDialog.Builder(getActivity);
+                ConfigurationHelper.SaveConfiguration(config, preferences);
+                new AlertDialog.Builder(MainActivity.this)
+                        .setTitle("Changes saved")
+                        .setMessage("Changes were saved successsfully").setPositiveButton("Very good", null)
+                        .show();
             }
         });
     }
