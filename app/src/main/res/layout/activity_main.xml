@@ -5,7 +5,9 @@
     android:id="@+id/padding"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity">
+    tools:context=".MainActivity"
+    android:padding="5dp"
+    >
 
     <TableLayout
         android:layout_width="match_parent"
@@ -25,8 +27,9 @@
 
             <Switch
                 android:id="@+id/switch1"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
+                android:layout_width="293dp"
+                android:layout_height="wrap_content"
+                android:height="48dp" />
         </TableRow>
 
         <TableRow
@@ -43,6 +46,7 @@
                 android:id="@+id/editTextTextPersonName"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:height="48dp"
                 android:ems="10"
                 android:inputType="textPersonName"
                 android:text="API Root" />
@@ -62,6 +66,7 @@
                 android:id="@+id/editTextTextPersonName2"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:height="48dp"
                 android:ems="10"
                 android:inputType="textPersonName"
                 android:text="Access Code" />
