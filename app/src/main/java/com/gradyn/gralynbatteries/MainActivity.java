@@ -17,8 +17,9 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.work.Constraints;
 import androidx.work.NetworkType;
+import androidx.work.OneTimeWorkRequest;
 import androidx.work.PeriodicWorkRequest;
-import androidx.work.WorkRequest;
+import androidx.work.WorkManager;
 
 public class MainActivity extends AppCompatActivity {
     public static MainActivity inst;
@@ -32,19 +33,20 @@ public class MainActivity extends AppCompatActivity {
         inst = this;
         preferences = getPreferences(Context.MODE_PRIVATE);
         config = ConfigurationHelper.LoadConfiguration(preferences);
+        WorkManager workManager = WorkManager.getInstance(this);
 
         final Switch batteryReportingSwitch = (Switch) findViewById(R.id.BatteryReportingSwitch);
         final EditText gralynApiRootTextView = (EditText) findViewById(R.id.GralynApiRootTextbox);
         final EditText accessCodeRootTextView = (EditText) findViewById(R.id.AccessCodeTextbox);
         final Button savebutton = (Button) findViewById(R.id.SaveButton);
 
-        WorkRequest reporter =
-                new PeriodicWorkRequest.Builder(BatteryReportWorker.class,
-                        15, TimeUnit.MINUTES).setConstraints(
-                                new Constraints.Builder()
-                                        .setRequiredNetworkType(NetworkType.CONNECTED)
-                                        .build())
-                        .build();
+        PeriodicWorkRequest pwr = new PeriodicWorkRequest.Builder(BatteryReportWorker.class,
+                15, TimeUnit.MINUTES).setConstraints(
+                        new Constraints.Builder()
+                                .setRequiredNetworkType(NetworkType.CONNECTED)
+                                .build())
+                .build();
+        workManager.enqueue(pwr);
 
         batteryReportingSwitch.setChecked(config.getBatteryReporting());
         gralynApiRootTextView.setText(config.getApiRoot());
@@ -60,6 +62,10 @@ public class MainActivity extends AppCompatActivity {
                         .setTitle("Changes saved")
                         .setMessage("Changes were saved successsfully").setPositiveButton("Very good", null)
                         .show();
+
+                workManager.enqueue(new OneTimeWorkRequest.Builder(BatteryReportWorker.class).build());
+                workManager.enqueue(pwr);
+
             }
         });
 

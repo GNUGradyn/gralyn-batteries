@@ -7,7 +7,9 @@ import android.util.Log;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
@@ -27,6 +29,7 @@ public class BatteryReportWorker extends Worker {
     @NonNull
     @Override
     public Result doWork() {
+        Log.println(Log.INFO, "BatteryReportWorker", "Running battery report worker");
         if (!MainActivity.inst.config.getBatteryReporting()) return Result.success();
         URL url = null;
         try {
@@ -37,19 +40,29 @@ public class BatteryReportWorker extends Worker {
             return Result.failure();
         }
         try {
+
             HttpURLConnection con = (HttpURLConnection) url.openConnection();
             con.setRequestMethod("POST");
             con.setRequestProperty("Content-Type", "application/json");
+            con.setRequestProperty("Accept", "application/json");
             con.setDoOutput(true);
             JSONObject json = new JSONObject();
             json.put("AccessCode", MainActivity.inst.config.getAccessCode());
             BatteryManager bm = (BatteryManager) MainActivity.inst.getSystemService(BATTERY_SERVICE);
             json.put("Level", bm.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY));
-            try(OutputStream os = con.getOutputStream()) {
+            try (OutputStream os = con.getOutputStream()) {
                 byte[] input = json.toString().getBytes("utf-8");
                 os.write(input, 0, input.length);
             }
-            con.disconnect();
+            try (BufferedReader br = new BufferedReader(
+                    new InputStreamReader(con.getInputStream(), "utf-8"))) {
+                StringBuilder response = new StringBuilder();
+                String responseLine = null;
+                while ((responseLine = br.readLine()) != null) {
+                    response.append(responseLine.trim());
+                }
+                System.out.println(response.toString());
+            }
         } catch (IOException e) {
             Log.println(Log.ERROR, "BatteryReportWorker", "Failed to open connection to API, retrying");
             e.printStackTrace();
