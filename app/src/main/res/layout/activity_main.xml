@@ -48,8 +48,7 @@
                 android:layout_height="wrap_content"
                 android:height="48dp"
                 android:ems="10"
-                android:inputType="textPersonName"
-                android:text="API Root" />
+                android:inputType="textPersonName" />
         </TableRow>
 
         <TableRow
@@ -68,8 +67,7 @@
                 android:layout_height="wrap_content"
                 android:height="48dp"
                 android:ems="10"
-                android:inputType="textPersonName"
-                android:text="Access Code" />
+                android:inputType="textPersonName" />
         </TableRow>
 
         <TableRow
