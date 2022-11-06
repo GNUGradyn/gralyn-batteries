@@ -16,8 +16,8 @@ import java.util.concurrent.TimeUnit;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.work.Constraints;
+import androidx.work.ExistingPeriodicWorkPolicy;
 import androidx.work.NetworkType;
-import androidx.work.OneTimeWorkRequest;
 import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkManager;
 
@@ -40,13 +40,13 @@ public class MainActivity extends AppCompatActivity {
         final EditText accessCodeRootTextView = (EditText) findViewById(R.id.AccessCodeTextbox);
         final Button savebutton = (Button) findViewById(R.id.SaveButton);
 
-        PeriodicWorkRequest pwr = new PeriodicWorkRequest.Builder(BatteryReportWorker.class,
-                15, TimeUnit.MINUTES).setConstraints(
-                        new Constraints.Builder()
-                                .setRequiredNetworkType(NetworkType.CONNECTED)
-                                .build())
-                .build();
-        workManager.enqueue(pwr);
+            PeriodicWorkRequest pwr = new PeriodicWorkRequest.Builder(BatteryReportWorker.class,
+                    15, TimeUnit.MINUTES).setConstraints(
+                            new Constraints.Builder()
+                                    .setRequiredNetworkType(NetworkType.CONNECTED)
+                                    .build())
+                    .build();
+        workManager.enqueueUniquePeriodicWork("BatteryReportWorker", ExistingPeriodicWorkPolicy.REPLACE, pwr);
 
         batteryReportingSwitch.setChecked(config.getBatteryReporting());
         gralynApiRootTextView.setText(config.getApiRoot());
@@ -63,8 +63,7 @@ public class MainActivity extends AppCompatActivity {
                         .setMessage("Changes were saved successsfully").setPositiveButton("Very good", null)
                         .show();
 
-                workManager.enqueue(new OneTimeWorkRequest.Builder(BatteryReportWorker.class).build());
-                workManager.enqueue(pwr);
+                workManager.enqueueUniquePeriodicWork("BatteryReportWorker", ExistingPeriodicWorkPolicy.REPLACE, pwr);
 
             }
         });
