@@ -75,7 +75,5 @@ public class BatteryReportWorker extends Worker {
         }
 
         return Result.success();
-
-
     }
 }
