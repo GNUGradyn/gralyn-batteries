@@ -1,6 +1,7 @@
 package com.gradyn.gralynbatteries;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.BatteryManager;
 import android.util.Log;
 
@@ -16,10 +17,14 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 import androidx.annotation.NonNull;
+import androidx.preference.PreferenceManager;
 import androidx.work.Worker;
 import androidx.work.WorkerParameters;
 
 import static android.content.Context.BATTERY_SERVICE;
+
+import com.gradyn.gralynbatteries.Configuration.Configuration;
+import com.gradyn.gralynbatteries.Configuration.ConfigurationHelper;
 
 public class BatteryReportWorker extends Worker {
     public BatteryReportWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
@@ -29,11 +34,12 @@ public class BatteryReportWorker extends Worker {
     @NonNull
     @Override
     public Result doWork() {
+        Configuration config = ConfigurationHelper.LoadConfiguration(PreferenceManager.getDefaultSharedPreferences(getApplicationContext()));
         Log.println(Log.INFO, "BatteryReportWorker", "Running battery report worker");
-        if (!MainActivity.inst.config.getBatteryReporting()) return Result.success();
+        if (!config.getBatteryReporting()) return Result.success();
         URL url = null;
         try {
-            url = new URL(MainActivity.inst.config.getApiRoot() + "/battery");
+            url = new URL(config.getApiRoot() + "/battery");
         } catch (MalformedURLException e) {
             Log.println(Log.ERROR, "BatteryReportWorker", "Failed to parse API url");
             e.printStackTrace();
@@ -47,7 +53,7 @@ public class BatteryReportWorker extends Worker {
             con.setRequestProperty("Accept", "application/json");
             con.setDoOutput(true);
             JSONObject json = new JSONObject();
-            json.put("AccessCode", MainActivity.inst.config.getAccessCode());
+            json.put("AccessCode", config.getAccessCode());
             BatteryManager bm = (BatteryManager) MainActivity.inst.getSystemService(BATTERY_SERVICE);
             json.put("Level", bm.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY));
             json.put("Charging", bm.isCharging());

@@ -15,6 +15,7 @@ import java.util.concurrent.TimeUnit;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.preference.PreferenceManager;
 import androidx.work.BackoffPolicy;
 import androidx.work.Constraints;
 import androidx.work.ExistingPeriodicWorkPolicy;
@@ -24,15 +25,15 @@ import androidx.work.WorkManager;
 
 public class MainActivity extends AppCompatActivity {
     public static MainActivity inst;
-    public SharedPreferences preferences;
-    public Configuration config;
+    private SharedPreferences preferences;
+    private Configuration config;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         inst = this;
-        preferences = getPreferences(Context.MODE_PRIVATE);
+        preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         config = ConfigurationHelper.LoadConfiguration(preferences);
         WorkManager workManager = WorkManager.getInstance(this);
 
@@ -47,7 +48,7 @@ public class MainActivity extends AppCompatActivity {
                                     .setRequiredNetworkType(NetworkType.CONNECTED)
                                     .build()).setBackoffCriteria(BackoffPolicy.LINEAR, 15, TimeUnit.MINUTES)
                     .build();
-        workManager.enqueueUniquePeriodicWork("BatteryReportWorker", ExistingPeriodicWorkPolicy.KEEP, pwr);
+        workManager.enqueueUniquePeriodicWork("BatteryReportWorker", ExistingPeriodicWorkPolicy.REPLACE, pwr);
 
         batteryReportingSwitch.setChecked(config.getBatteryReporting());
         gralynApiRootTextView.setText(config.getApiRoot());
