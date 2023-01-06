@@ -27,8 +27,11 @@ import com.gradyn.gralynbatteries.Configuration.Configuration;
 import com.gradyn.gralynbatteries.Configuration.ConfigurationHelper;
 
 public class BatteryReportWorker extends Worker {
-    public BatteryReportWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
-        super(context, workerParams);
+    private Context context;
+
+    public BatteryReportWorker(@NonNull Context _context, @NonNull WorkerParameters workerParams) {
+        super(_context, workerParams);
+        _context = context;
     }
 
     @NonNull
@@ -54,7 +57,7 @@ public class BatteryReportWorker extends Worker {
             con.setDoOutput(true);
             JSONObject json = new JSONObject();
             json.put("AccessCode", config.getAccessCode());
-            BatteryManager bm = (BatteryManager) MainActivity.inst.getSystemService(BATTERY_SERVICE);
+            BatteryManager bm = (BatteryManager) getApplicationContext().getSystemService(BATTERY_SERVICE);
             json.put("Level", bm.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY));
             json.put("Charging", bm.isCharging());
             try (OutputStream os = con.getOutputStream()) {

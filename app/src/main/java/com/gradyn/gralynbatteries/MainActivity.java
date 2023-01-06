@@ -24,7 +24,6 @@ import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkManager;
 
 public class MainActivity extends AppCompatActivity {
-    public static MainActivity inst;
     private SharedPreferences preferences;
     private Configuration config;
 
@@ -32,7 +31,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        inst = this;
         preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         config = ConfigurationHelper.LoadConfiguration(preferences);
         WorkManager workManager = WorkManager.getInstance(this);
