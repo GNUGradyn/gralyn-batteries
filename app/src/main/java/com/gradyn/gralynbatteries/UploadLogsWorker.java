@@ -18,12 +18,20 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+
+import okhttp3.MediaType;
+import okhttp3.MultipartBody;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 
 public class UploadLogsWorker extends Worker {
     public UploadLogsWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
@@ -33,50 +41,51 @@ public class UploadLogsWorker extends Worker {
     @NonNull
     @Override
     public Result doWork() {
-        Log.println(Log.INFO, "UploadLogsWorker", "Uploading logs to gralyn API");
+        Log.println(Log.INFO, "BatteryReportWorker", "Running battery report worker");
         Configuration config = ConfigurationHelper.LoadConfiguration(PreferenceManager.getDefaultSharedPreferences(getApplicationContext()));
+        BatteryManager bm = (BatteryManager) getApplicationContext().getSystemService(BATTERY_SERVICE);
+        if (!config.getBatteryReporting()) return Result.success();
         URL url = null;
         try {
-            url = new URL(config.getApiRoot() + "/battery");
+            url = new URL(config.getApiRoot() + "/log");
         } catch (MalformedURLException e) {
-            Log.println(Log.ERROR, "UploadLogsWorker", "Failed to parse API url");
+            Log.println(Log.ERROR, "BatteryReportWorker", "Failed to parse API url");
             e.printStackTrace();
             return Result.failure();
         }
+        Process logcat;
+        final StringBuilder log = new StringBuilder();
         try {
-
-            HttpURLConnection con = (HttpURLConnection) url.openConnection();
-            con.setRequestMethod("POST");
-            con.setRequestProperty("Content-Type", "application/json");
-            con.setRequestProperty("Accept", "application/json");
-            con.setDoOutput(true);
-            JSONObject json = new JSONObject();
-            json.put("AccessCode", config.getAccessCode());
-            BatteryManager bm = (BatteryManager) getApplicationContext().getSystemService(BATTERY_SERVICE);
-            json.put("Level", bm.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY));
-            json.put("Charging", bm.isCharging());
-            try (OutputStream os = con.getOutputStream()) {
-                byte[] input = json.toString().getBytes("utf-8");
-                os.write(input, 0, input.length);
+            logcat = Runtime.getRuntime().exec(new String[]{"logcat", "-d"});
+            BufferedReader br = new BufferedReader(new InputStreamReader(logcat.getInputStream()),4*1024);
+            String line;
+            String separator = System.getProperty("line.separator");
+            while ((line = br.readLine()) != null) {
+                log.append(line);
+                log.append(separator);
             }
-            try (BufferedReader br = new BufferedReader(
-                    new InputStreamReader(con.getInputStream(), "utf-8"))) {
-                StringBuilder response = new StringBuilder();
-                String responseLine = null;
-                while ((responseLine = br.readLine()) != null) {
-                    response.append(responseLine.trim());
-                }
-                System.out.println(response.toString());
-            }
-        } catch (IOException e) {
-            Log.println(Log.ERROR, "BatteryReportWorker", "Failed to open connection to API, retrying");
+        } catch (Exception e) {
             e.printStackTrace();
-            return Result.retry();
-        } catch (JSONException e) {
-            Log.println(Log.ERROR, "BatteryReportWorker", "Malformed JSON in battery report");
-            e.printStackTrace();
-            return Result.failure();
         }
+        RequestBody body = new MultipartBody.Builder().setType(MultipartBody.FORM)
+                .addFormDataPart("AccessCode",config.getAccessCode())
+                .addFormDataPart("Log","log.txt",
+                        RequestBody.create(MediaType.parse("application/octet-stream"), log.toString()))
+                .build();
+        OkHttpClient client = new OkHttpClient().newBuilder()
+                .build();
+        MediaType mediaType = MediaType.parse("application/json");
+        Request request = new Request.Builder()
+                .url(url)
+                .method("POST", body)
+                .build();
+        try {
+            Response response = client.newCall(request).execute();
+        } catch (IOException e) {
+            Log.println(Log.ERROR, "BatteryReportWorker", "Failed to reach API. retrying");
+            return Result.retry();
+        }
+
         return Result.success();
     }
 }
