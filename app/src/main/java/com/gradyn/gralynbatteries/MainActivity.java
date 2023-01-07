@@ -20,6 +20,7 @@ import androidx.work.BackoffPolicy;
 import androidx.work.Constraints;
 import androidx.work.ExistingPeriodicWorkPolicy;
 import androidx.work.NetworkType;
+import androidx.work.OneTimeWorkRequest;
 import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkManager;
 
@@ -39,6 +40,7 @@ public class MainActivity extends AppCompatActivity {
         final EditText gralynApiRootTextView = (EditText) findViewById(R.id.GralynApiRootTextbox);
         final EditText accessCodeRootTextView = (EditText) findViewById(R.id.AccessCodeTextbox);
         final Button savebutton = (Button) findViewById(R.id.SaveButton);
+        final Button logButton = (Button) findViewById(R.id.LogButton);
 
             PeriodicWorkRequest pwr = new PeriodicWorkRequest.Builder(BatteryReportWorker.class,
                     15, TimeUnit.MINUTES).setConstraints(
@@ -65,6 +67,17 @@ public class MainActivity extends AppCompatActivity {
 
                 workManager.enqueueUniquePeriodicWork("BatteryReportWorker", ExistingPeriodicWorkPolicy.REPLACE, pwr);
 
+            }
+        });
+        logButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                OneTimeWorkRequest otwr = new OneTimeWorkRequest.Builder(UploadLogsWorker.class).setConstraints(
+                                new Constraints.Builder()
+                                        .setRequiredNetworkType(NetworkType.CONNECTED)
+                                        .build())
+                        .build();
+                workManager.enqueue(otwr);
             }
         });
 
