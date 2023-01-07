@@ -28,6 +28,8 @@
                 android:id="@+id/BatteryReportingLabel"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:height="48dp"
+                android:gravity="center_vertical"
                 android:text="Battery Reporting" />
 
             <FrameLayout android:layout_width="match_parent">
@@ -81,7 +83,9 @@
 
         <TableRow
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"
+            android:gravity="right"
+            android:paddingVertical="10dp">
 
             <Button
                 android:id="@+id/SaveButton"
