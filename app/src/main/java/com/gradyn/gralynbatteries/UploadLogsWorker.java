@@ -1,14 +1,24 @@
 package com.gradyn.gralynbatteries;
 
+import static android.content.Context.BATTERY_SERVICE;
+
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.os.BatteryManager;
 import android.util.Log;
+
+import androidx.annotation.NonNull;
+import androidx.preference.PreferenceManager;
+import androidx.work.Worker;
+import androidx.work.WorkerParameters;
+
+import com.gradyn.gralynbatteries.Configuration.Configuration;
+import com.gradyn.gralynbatteries.Configuration.ConfigurationHelper;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
@@ -16,28 +26,16 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-import androidx.annotation.NonNull;
-import androidx.preference.PreferenceManager;
-import androidx.work.Worker;
-import androidx.work.WorkerParameters;
-
-import static android.content.Context.BATTERY_SERVICE;
-
-import com.gradyn.gralynbatteries.Configuration.Configuration;
-import com.gradyn.gralynbatteries.Configuration.ConfigurationHelper;
-
 import okhttp3.MediaType;
+import okhttp3.MultipartBody;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
-public class BatteryReportWorker extends Worker {
-    private Context context;
-
-    public BatteryReportWorker(@NonNull Context _context, @NonNull WorkerParameters workerParams) {
-        super(_context, workerParams);
-        _context = context;
+public class UploadLogsWorker extends Worker {
+    public UploadLogsWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
+        super(context, workerParams);
     }
 
     @NonNull
@@ -49,29 +47,37 @@ public class BatteryReportWorker extends Worker {
         if (!config.getBatteryReporting()) return Result.success();
         URL url = null;
         try {
-            url = new URL(config.getApiRoot() + "/battery");
+            url = new URL(config.getApiRoot() + "/log");
         } catch (MalformedURLException e) {
             Log.println(Log.ERROR, "BatteryReportWorker", "Failed to parse API url");
             e.printStackTrace();
             return Result.failure();
         }
-        JSONObject jsonObject = new JSONObject();
+        Process logcat;
+        final StringBuilder log = new StringBuilder();
         try {
-            jsonObject.put("AccessCode", config.getAccessCode());
-            jsonObject.put("Level", bm.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY));
-            jsonObject.put("Charging", bm.isCharging());
-        } catch (JSONException e) {
-            Log.println(Log.ERROR, "BatteryReportWorker", "Failed to generate JSON object");
-            return Result.failure();
+            logcat = Runtime.getRuntime().exec(new String[]{"logcat", "-d"});
+            BufferedReader br = new BufferedReader(new InputStreamReader(logcat.getInputStream()),4*1024);
+            String line;
+            String separator = System.getProperty("line.separator");
+            while ((line = br.readLine()) != null) {
+                log.append(line);
+                log.append(separator);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
+        RequestBody body = new MultipartBody.Builder().setType(MultipartBody.FORM)
+                .addFormDataPart("AccessCode",config.getAccessCode())
+                .addFormDataPart("Log","log.txt",
+                        RequestBody.create(MediaType.parse("application/octet-stream"), log.toString()))
+                .build();
         OkHttpClient client = new OkHttpClient().newBuilder()
                 .build();
         MediaType mediaType = MediaType.parse("application/json");
-        RequestBody body = RequestBody.create(mediaType, jsonObject.toString());
         Request request = new Request.Builder()
-                .url("https://gralyn.app/api/battery")
+                .url(url)
                 .method("POST", body)
-                .addHeader("Content-Type", "application/json")
                 .build();
         try {
             Response response = client.newCall(request).execute();

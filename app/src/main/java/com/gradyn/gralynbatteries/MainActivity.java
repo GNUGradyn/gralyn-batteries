@@ -42,12 +42,12 @@ public class MainActivity extends AppCompatActivity {
         final Button savebutton = (Button) findViewById(R.id.SaveButton);
         final Button logButton = (Button) findViewById(R.id.LogButton);
 
-            PeriodicWorkRequest pwr = new PeriodicWorkRequest.Builder(BatteryReportWorker.class,
-                    15, TimeUnit.MINUTES).setConstraints(
-                            new Constraints.Builder()
-                                    .setRequiredNetworkType(NetworkType.CONNECTED)
-                                    .build()).setBackoffCriteria(BackoffPolicy.LINEAR, 15, TimeUnit.MINUTES)
-                    .build();
+        PeriodicWorkRequest pwr = new PeriodicWorkRequest.Builder(BatteryReportWorker.class,
+                15, TimeUnit.MINUTES).setConstraints(
+                        new Constraints.Builder()
+                                .setRequiredNetworkType(NetworkType.CONNECTED)
+                                .build()).setBackoffCriteria(BackoffPolicy.LINEAR, 15, TimeUnit.MINUTES)
+                .build();
         workManager.enqueueUniquePeriodicWork("BatteryReportWorker", ExistingPeriodicWorkPolicy.REPLACE, pwr);
 
         batteryReportingSwitch.setChecked(config.getBatteryReporting());
