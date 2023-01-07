@@ -3,6 +3,8 @@ package com.gradyn.gralynbatteries;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -29,6 +31,12 @@ public class MainActivity extends AppCompatActivity {
     private Configuration config;
 
     @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.hotdog, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
@@ -40,7 +48,6 @@ public class MainActivity extends AppCompatActivity {
         final EditText gralynApiRootTextView = (EditText) findViewById(R.id.GralynApiRootTextbox);
         final EditText accessCodeRootTextView = (EditText) findViewById(R.id.AccessCodeTextbox);
         final Button savebutton = (Button) findViewById(R.id.SaveButton);
-        final Button logButton = (Button) findViewById(R.id.LogButton);
 
         PeriodicWorkRequest pwr = new PeriodicWorkRequest.Builder(BatteryReportWorker.class,
                 15, TimeUnit.MINUTES).setConstraints(
@@ -69,18 +76,21 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
-        logButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.logbutton:
                 OneTimeWorkRequest otwr = new OneTimeWorkRequest.Builder(UploadLogsWorker.class).setConstraints(
                                 new Constraints.Builder()
                                         .setRequiredNetworkType(NetworkType.CONNECTED)
                                         .build())
                         .build();
-                workManager.enqueue(otwr);
-            }
-        });
-
-
+                WorkManager.getInstance(this).enqueue(otwr);
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 }

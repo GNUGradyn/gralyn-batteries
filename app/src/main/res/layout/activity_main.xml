@@ -8,97 +8,83 @@
     android:padding="5dp"
     tools:context=".MainActivity">
 
-    <LinearLayout
+    <TableLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:gravity="center_horizontal"
-        android:orientation="vertical"
+        android:layout_height="wrap_content"
+        android:stretchColumns="1"
         tools:layout_editor_absoluteX="5dp"
         tools:layout_editor_absoluteY="5dp">
 
-        <TableLayout
+        <TableRow
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:stretchColumns="1">
+            android:layout_height="match_parent">
 
-            <TableRow
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
+            <TextView
+                android:id="@+id/BatteryReportingLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Battery Reporting" />
 
-                <TextView
-                    android:id="@+id/BatteryReportingLabel"
+            <FrameLayout android:layout_width="match_parent">
+
+                <Switch
+                    android:id="@+id/BatteryReportingSwitch"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Battery Reporting" />
+                    android:layout_gravity="end"
+                    android:height="48dp" />
+            </FrameLayout>
+        </TableRow>
 
-                <FrameLayout android:layout_width="match_parent">
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
 
-                    <Switch
-                        android:id="@+id/BatteryReportingSwitch"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="end"
-                        android:height="48dp" />
-                </FrameLayout>
-            </TableRow>
+            <TextView
+                android:id="@+id/GralynAPIRoot"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Gralyn API Root" />
 
-            <TableRow
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
+            <EditText
+                android:id="@+id/GralynApiRootTextbox"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:height="48dp"
+                android:ems="10"
+                android:inputType="textPersonName" />
+        </TableRow>
 
-                <TextView
-                    android:id="@+id/GralynAPIRoot"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Gralyn API Root" />
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
 
-                <EditText
-                    android:id="@+id/GralynApiRootTextbox"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:height="48dp"
-                    android:ems="10"
-                    android:inputType="textPersonName" />
-            </TableRow>
+            <TextView
+                android:id="@+id/textView3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Access Code" />
 
-            <TableRow
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
+            <EditText
+                android:id="@+id/AccessCodeTextbox"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:height="48dp"
+                android:ems="10"
+                android:inputType="textPersonName" />
+        </TableRow>
 
-                <TextView
-                    android:id="@+id/textView3"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Access Code" />
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
 
-                <EditText
-                    android:id="@+id/AccessCodeTextbox"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:height="48dp"
-                    android:ems="10"
-                    android:inputType="textPersonName" />
-            </TableRow>
+            <Button
+                android:id="@+id/SaveButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Save" />
 
-            <TableRow
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
+        </TableRow>
+    </TableLayout>
 
-                <Button
-                    android:id="@+id/SaveButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Save" />
-
-            </TableRow>
-        </TableLayout>
-
-        <Button
-            android:id="@+id/LogButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Upload logs tm">
-
-        </Button>
-    </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>
