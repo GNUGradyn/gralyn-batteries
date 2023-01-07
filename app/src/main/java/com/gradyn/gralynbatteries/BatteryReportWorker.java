@@ -26,6 +26,12 @@ import static android.content.Context.BATTERY_SERVICE;
 import com.gradyn.gralynbatteries.Configuration.Configuration;
 import com.gradyn.gralynbatteries.Configuration.ConfigurationHelper;
 
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
+
 public class BatteryReportWorker extends Worker {
     private Context context;
 
@@ -37,8 +43,9 @@ public class BatteryReportWorker extends Worker {
     @NonNull
     @Override
     public Result doWork() {
-        Configuration config = ConfigurationHelper.LoadConfiguration(PreferenceManager.getDefaultSharedPreferences(getApplicationContext()));
         Log.println(Log.INFO, "BatteryReportWorker", "Running battery report worker");
+        Configuration config = ConfigurationHelper.LoadConfiguration(PreferenceManager.getDefaultSharedPreferences(getApplicationContext()));
+        BatteryManager bm = (BatteryManager) getApplicationContext().getSystemService(BATTERY_SERVICE);
         if (!config.getBatteryReporting()) return Result.success();
         URL url = null;
         try {
@@ -48,39 +55,29 @@ public class BatteryReportWorker extends Worker {
             e.printStackTrace();
             return Result.failure();
         }
+        JSONObject jsonObject = new JSONObject();
         try {
-
-            HttpURLConnection con = (HttpURLConnection) url.openConnection();
-            con.setRequestMethod("POST");
-            con.setRequestProperty("Content-Type", "application/json");
-            con.setRequestProperty("Accept", "application/json");
-            con.setDoOutput(true);
-            JSONObject json = new JSONObject();
-            json.put("AccessCode", config.getAccessCode());
-            BatteryManager bm = (BatteryManager) getApplicationContext().getSystemService(BATTERY_SERVICE);
-            json.put("Level", bm.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY));
-            json.put("Charging", bm.isCharging());
-            try (OutputStream os = con.getOutputStream()) {
-                byte[] input = json.toString().getBytes("utf-8");
-                os.write(input, 0, input.length);
-            }
-            try (BufferedReader br = new BufferedReader(
-                    new InputStreamReader(con.getInputStream(), "utf-8"))) {
-                StringBuilder response = new StringBuilder();
-                String responseLine = null;
-                while ((responseLine = br.readLine()) != null) {
-                    response.append(responseLine.trim());
-                }
-                System.out.println(response.toString());
-            }
-        } catch (IOException e) {
-            Log.println(Log.ERROR, "BatteryReportWorker", "Failed to open connection to API, retrying");
-            e.printStackTrace();
-            return Result.retry();
+            jsonObject.put("AccessCode", config.getAccessCode());
+            jsonObject.put("Level", bm.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY));
+            jsonObject.put("Charging", bm.isCharging());
         } catch (JSONException e) {
-            Log.println(Log.ERROR, "BatteryReportWorker", "Malformed JSON in battery report");
-            e.printStackTrace();
+            Log.println(Log.ERROR, "BatteryReportWorker", "Failed to generate JSON object");
             return Result.failure();
+        }
+        OkHttpClient client = new OkHttpClient().newBuilder()
+                .build();
+        MediaType mediaType = MediaType.parse("application/json");
+        RequestBody body = RequestBody.create(mediaType, jsonObject.toString());
+        Request request = new Request.Builder()
+                .url("https://gralyn.app/api/battery")
+                .method("POST", body)
+                .addHeader("Content-Type", "application/json")
+                .build();
+        try {
+            Response response = client.newCall(request).execute();
+        } catch (IOException e) {
+            Log.println(Log.ERROR, "BatteryReportWorker", "Failed to reach API. retrying");
+            return Result.retry();
         }
 
         return Result.success();
