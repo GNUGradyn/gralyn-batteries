@@ -40,12 +40,12 @@ public class MainActivity extends AppCompatActivity {
         final EditText accessCodeRootTextView = (EditText) findViewById(R.id.AccessCodeTextbox);
         final Button savebutton = (Button) findViewById(R.id.SaveButton);
 
-            PeriodicWorkRequest pwr = new PeriodicWorkRequest.Builder(BatteryReportWorker.class,
-                    15, TimeUnit.MINUTES).setConstraints(
-                            new Constraints.Builder()
-                                    .setRequiredNetworkType(NetworkType.CONNECTED)
-                                    .build()).setBackoffCriteria(BackoffPolicy.LINEAR, 15, TimeUnit.MINUTES)
-                    .build();
+        PeriodicWorkRequest pwr = new PeriodicWorkRequest.Builder(BatteryReportWorker.class,
+                15, TimeUnit.MINUTES).setConstraints(
+                        new Constraints.Builder()
+                                .setRequiredNetworkType(NetworkType.CONNECTED)
+                                .build()).setBackoffCriteria(BackoffPolicy.LINEAR, 15, TimeUnit.MINUTES)
+                .build();
         workManager.enqueueUniquePeriodicWork("BatteryReportWorker", ExistingPeriodicWorkPolicy.REPLACE, pwr);
 
         batteryReportingSwitch.setChecked(config.getBatteryReporting());
