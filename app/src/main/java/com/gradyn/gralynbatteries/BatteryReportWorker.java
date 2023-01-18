@@ -128,7 +128,7 @@ public class BatteryReportWorker extends Worker {
         // todo: make this a read only field
         NotificationManager nm = (NotificationManager) getApplicationContext().getSystemService(NOTIFICATION_SERVICE);
 
-        NotificationChannel channel = new NotificationChannel("Battery Report Worker", "ShortcutBadger Sample",
+        NotificationChannel channel = new NotificationChannel("Battery Report Worker", "Battery Report Worker",
                 NotificationManager.IMPORTANCE_DEFAULT);
 
         nm.createNotificationChannel(channel);
