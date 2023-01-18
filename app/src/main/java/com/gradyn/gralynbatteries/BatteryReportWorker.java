@@ -125,7 +125,13 @@ public class BatteryReportWorker extends Worker {
 
     @RequiresApi(Build.VERSION_CODES.O)
     private void createChannel() {
-        // Create a Notification channel
+        // todo: make this a read only field
+        NotificationManager nm = (NotificationManager) getApplicationContext().getSystemService(NOTIFICATION_SERVICE);
+
+        NotificationChannel channel = new NotificationChannel("Battery Report Worker", "ShortcutBadger Sample",
+                NotificationManager.IMPORTANCE_DEFAULT);
+
+        nm.createNotificationChannel(channel);
     }
 
 }
